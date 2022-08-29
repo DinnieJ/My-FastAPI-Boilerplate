@@ -1,0 +1,24 @@
+version: '3.1'
+
+services:
+  fatapi-database:
+    container_name: fatapi-database
+    image: mysql:latest
+    env_file:
+      - ./.env
+    volumes:
+      - ./docker/mysql:/var/lib/mysql:rw
+    ports:
+      - 3306:3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=${DATABASE_NAME}
+      - MYSQL_USER=${DATABASE_USERNAME}
+      - MYSQL_PASSWORD=${DATABASE_PASSWORD}
+    restart: always
+    networks:
+      - app
+    
+networks:
+  app:
+    

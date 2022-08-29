@@ -1,24 +1,34 @@
-from fastapi import FastAPI, Depends
-from fastapi.requests import Request
-from fastapi.routing import APIRouter
-from typing import Any
+from core.app.application import Application
+from routers import routers
+from dotenv import load_dotenv
+import uvicorn
+from os import getenv
 
 
-router = APIRouter()
+load_dotenv(".env")
+app = Application.load_app(
+    routers=routers,
+    static_dir="static",
+    static_path="/static"
+)
 
-class Permission:
-    def __init__(self) -> None:
-        pass
-    async def __call__(self, request:Request) -> Any:
-        print(1)
-        print(request, 1)
-        print(request)
-@router.get("/", dependencies=[Depends(Permission)])
-async def test():
-    return {"1": "2"}
+def main() -> None:
+    if getenv("APP_DEBUG") == "True":
+        print("Application running with debugger mode")
+        uvicorn.run(
+            "dev_server:app", 
+            host=getenv("APP_HOST"), 
+            port=int(getenv("APP_PORT")),
+            reload=True,
+            reload_excludes=["./docker/*"]
+        )
+    else:
+        uvicorn.run(
+            app, 
+            host=getenv("APP_HOST"), 
+            port=int(getenv("APP_PORT")),
+        )
 
 
-app = FastAPI()
-app.add_middleware(Permission)
-app.include_router(router)
-
+if __name__ == "__main__":
+    main()
