@@ -8,6 +8,7 @@ Create Date: 2022-08-29 16:23:43.665772
 from email.policy import default
 from alembic import op
 import sqlalchemy as sa
+from sqlalchemy.dialects.mysql import TIMESTAMP
 
 
 # revision identifiers, used by Alembic.
@@ -23,10 +24,12 @@ def upgrade() -> None:
         sa.Column('id', sa.BigInteger, primary_key=True, autoincrement='ignore_fk'),
         sa.Column('name', sa.String(255), nullable=True),
         sa.Column('user_id', sa.BigInteger, nullable=False),
-        sa.Column('created_at', sa.TIMESTAMP, default="CURRENT_TIMESTAMP"),
-        sa.Column('updated_at', sa.TIMESTAMP, default="CURRENT_TIMESTAMP", onupdate="CURRENT_TIMESTAMP"),
+        sa.Column('created_at', TIMESTAMP(), server_default=sa.text("CURRENT_TIMESTAMP")),
+        sa.Column('updated_at', TIMESTAMP(), 
+            server_default=sa.text("CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP"), 
+        )
     )
 
 
 def downgrade() -> None:
-    pass
+    op.drop_table("tb_tasks")
