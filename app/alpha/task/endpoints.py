@@ -1,7 +1,8 @@
 from typing import Any, Union
-from fastapi import APIRouter, Depends, Header
+from fastapi import APIRouter, Depends, Header, UploadFile, BackgroundTasks
 from .services import TaskService
 from .models import Task
+import os
 
 
 class CheckQueryDependency:
@@ -33,6 +34,17 @@ async def insert():
 async def delete(id: int):
     print(id)
     await TaskService.delete(id)
+
+def savefile(file: UploadFile):
+    directory =  f"{os.getcwd()}/static/{file.filename}"
+    with open(directory, "wb+") as file_object:
+        file_object.write(file.file.read())
+    return {"info": f"file '{file.filename}' saved at '{directory}'"}
+
+@router.post("/file")
+async def upload_file(file: UploadFile, background_tasks: BackgroundTasks):
+    background_tasks.add_task(savefile, file)
+    return {"info": f"file '{file.filename}' saved"}
 
 
 @router.get("/all")
